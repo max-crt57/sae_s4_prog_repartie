@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "leaflet": "^1.9.4"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0",
+    "typescript": "^6.0.3",
+    "@types/leaflet": "^1.9.21"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "watch": "node build.js --watch"
+  }
+}
