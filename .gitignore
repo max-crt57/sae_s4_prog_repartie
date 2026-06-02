@@ -4,6 +4,6 @@
 /out/
 *.map
 /node_modules/
-package-lock.json
+/web/package-lock.json
 /proxy-java/target/
 
