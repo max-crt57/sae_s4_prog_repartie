@@ -52,13 +52,20 @@ async function fetchJson<T = any>(path: string, options: RequestInit = {}): Prom
     return data;
 }
 
-// ICON
-function icon(className: string, text: string): L.DivIcon {
+// ICONE
+function veloIcon(bikesAvailable: number = 0): L.DivIcon {
+    // Si des vélos sont dispos, la classe est 'dispo' (vert), sinon 'vide' (rouge)
+    const statusClass = bikesAvailable > 0 ? 'dispo' : 'vide';
+    
+    // Le dessin (SVG) du vélo
+    const bikeSvg = `<svg viewBox="0 0 24 24"><path d="M15.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM5 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5zm5.8-10l2.4-2.4.8.8c1.3 1.3 3 2.1 5.1 2.1V9c-1.5 0-2.7-.6-3.6-1.5l-1.9-1.9c-.5-.4-1-.6-1.6-.6s-1.1.2-1.4.6L7.8 8.4c-.4.4-.6.9-.6 1.4 0 .6.2 1.1.6 1.4L11 14v5h2v-6.2l-2.2-2.3zM19 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5z"/></svg>`;
+
     return L.divIcon({
-        className: '',
-        html: `<div class="${className}">${text}</div>`,
-        iconSize: [26, 26],
-        iconAnchor: [13, 13]
+        className: 'custom-leaflet-icon',
+        html: `<div class="velo-pin ${statusClass}">${bikeSvg}</div>`,
+        iconSize: [30, 42], // Taille totale (le pin dépasse de la boite)
+        iconAnchor: [15, 34], // Pointe exacte sur la carte (moitié largeur, bas du pin)
+        popupAnchor: [0, -30] // Le popup s'ouvrira juste au-dessus du pin
     });
 }
 
@@ -80,8 +87,11 @@ async function loadBikes(): Promise<void> {
     const data = await fetchJson<{ stations: BikeStation[] }>('/api/bikes');
 
     data.stations.forEach(station => {
+        // On récupère le nombre de vélos (0 si indéfini)
+        const bikes = station.num_bikes_available ?? 0;
+
         L.marker([station.lat, station.lon], {
-            icon: icon('marker-bike', 'V')
+            icon: veloIcon(bikes)
         })
             .bindPopup(`
                 <strong>${escapeHtml(station.name)}</strong><br>

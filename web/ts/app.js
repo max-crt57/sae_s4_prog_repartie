@@ -4834,7 +4834,7 @@
             return Browser.retina && this.options[name + "RetinaUrl"] || this.options[name + "Url"];
           }
         });
-        function icon2(options) {
+        function icon(options) {
           return new Icon(options);
         }
         var IconDefault = Icon.extend({
@@ -4882,9 +4882,9 @@
             this._marker = marker2;
           },
           addHooks: function() {
-            var icon3 = this._marker._icon;
+            var icon2 = this._marker._icon;
             if (!this._draggable) {
-              this._draggable = new Draggable(icon3, icon3, true);
+              this._draggable = new Draggable(icon2, icon2, true);
             }
             this._draggable.on({
               dragstart: this._onDragStart,
@@ -4892,7 +4892,7 @@
               drag: this._onDrag,
               dragend: this._onDragEnd
             }, this).enable();
-            addClass(icon3, "leaflet-marker-draggable");
+            addClass(icon2, "leaflet-marker-draggable");
           },
           removeHooks: function() {
             this._draggable.off({
@@ -5078,8 +5078,8 @@
           },
           // @method setIcon(icon: Icon): this
           // Changes the marker icon.
-          setIcon: function(icon3) {
-            this.options.icon = icon3;
+          setIcon: function(icon2) {
+            this.options.icon = icon2;
             if (this._map) {
               this._initIcon();
               this.update();
@@ -5101,25 +5101,25 @@
           },
           _initIcon: function() {
             var options = this.options, classToAdd = "leaflet-zoom-" + (this._zoomAnimated ? "animated" : "hide");
-            var icon3 = options.icon.createIcon(this._icon), addIcon = false;
-            if (icon3 !== this._icon) {
+            var icon2 = options.icon.createIcon(this._icon), addIcon = false;
+            if (icon2 !== this._icon) {
               if (this._icon) {
                 this._removeIcon();
               }
               addIcon = true;
               if (options.title) {
-                icon3.title = options.title;
+                icon2.title = options.title;
               }
-              if (icon3.tagName === "IMG") {
-                icon3.alt = options.alt || "";
+              if (icon2.tagName === "IMG") {
+                icon2.alt = options.alt || "";
               }
             }
-            addClass(icon3, classToAdd);
+            addClass(icon2, classToAdd);
             if (options.keyboard) {
-              icon3.tabIndex = "0";
-              icon3.setAttribute("role", "button");
+              icon2.tabIndex = "0";
+              icon2.setAttribute("role", "button");
             }
-            this._icon = icon3;
+            this._icon = icon2;
             if (options.riseOnHover) {
               this.on({
                 mouseover: this._bringToFront,
@@ -5127,7 +5127,7 @@
               });
             }
             if (this.options.autoPanOnFocus) {
-              on(icon3, "focus", this._panOnFocus, this);
+              on(icon2, "focus", this._panOnFocus, this);
             }
             var newShadow = options.icon.createShadow(this._shadow), addShadow = false;
             if (newShadow !== this._shadow) {
@@ -9544,7 +9544,7 @@
         exports2.geoJSON = geoJSON;
         exports2.geoJson = geoJson;
         exports2.gridLayer = gridLayer;
-        exports2.icon = icon2;
+        exports2.icon = icon;
         exports2.imageOverlay = imageOverlay;
         exports2.latLng = toLatLng;
         exports2.latLngBounds = toLatLngBounds;
@@ -9604,26 +9604,18 @@
     }
     return data;
   }
-  function icon(className, text) {
+  function veloIcon(bikesAvailable = 0) {
+    const statusClass = bikesAvailable > 0 ? "dispo" : "vide";
+    const bikeSvg = `<svg viewBox="0 0 24 24"><path d="M15.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM5 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5zm5.8-10l2.4-2.4.8.8c1.3 1.3 3 2.1 5.1 2.1V9c-1.5 0-2.7-.6-3.6-1.5l-1.9-1.9c-.5-.4-1-.6-1.6-.6s-1.1.2-1.4.6L7.8 8.4c-.4.4-.6.9-.6 1.4 0 .6.2 1.1.6 1.4L11 14v5h2v-6.2l-2.2-2.3zM19 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5z"/></svg>`;
     return import_leaflet.default.divIcon({
-      className: "",
-      html: `<div class="${className}">${text}</div>`,
-      iconSize: [26, 26],
-      iconAnchor: [13, 13]
-    });
-  }
-  async function loadBikes() {
-    layers.bikes.clearLayers();
-    const data = await fetchJson("/api/bikes");
-    data.stations.forEach((station) => {
-      import_leaflet.default.marker([station.lat, station.lon], {
-        icon: icon("marker-bike", "V")
-      }).bindPopup(`
-                <strong>${escapeHtml(station.name)}</strong><br>
-                ${escapeHtml(station.address || "")}<br>
-                <span class="badge">V\xE9los : ${station.num_bikes_available ?? "?"}</span>
-                <span class="badge">Places : ${station.num_docks_available ?? "?"}</span>
-            `).addTo(layers.bikes);
+      className: "custom-leaflet-icon",
+      html: `<div class="velo-pin ${statusClass}">${bikeSvg}</div>`,
+      iconSize: [30, 42],
+      // Taille totale (le pin dépasse de la boite)
+      iconAnchor: [15, 34],
+      // Pointe exacte sur la carte (moitié largeur, bas du pin)
+      popupAnchor: [0, -30]
+      // Le popup s'ouvrira juste au-dessus du pin
     });
   }
   function escapeHtml(value) {
@@ -9634,6 +9626,21 @@
       "'": "&#39;",
       '"': "&quot;"
     })[c]);
+  }
+  async function loadBikes() {
+    layers.bikes.clearLayers();
+    const data = await fetchJson("/api/bikes");
+    data.stations.forEach((station) => {
+      const bikes = station.num_bikes_available ?? 0;
+      import_leaflet.default.marker([station.lat, station.lon], {
+        icon: veloIcon(bikes)
+      }).bindPopup(`
+                <strong>${escapeHtml(station.name)}</strong><br>
+                ${escapeHtml(station.address || "")}<br>
+                <span class="badge">V\xE9los : ${station.num_bikes_available ?? "?"}</span>
+                <span class="badge">Places : ${station.num_docks_available ?? "?"}</span>
+            `).addTo(layers.bikes);
+    });
   }
   async function reloadAll() {
     try {
