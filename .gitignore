@@ -1,0 +1,6 @@
+*.class
+*.env
+/.idea/
+/out/
+*.map
+/node_modules/
