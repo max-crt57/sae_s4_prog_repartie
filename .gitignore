@@ -8,5 +8,8 @@ web/package-lock.json
 /proxy-java/target/
 .vscode/
 *.js
-rmi/rmi-restaurant/src/target/
+target/
+.mvn/
+build.js
+app.js
 target/
