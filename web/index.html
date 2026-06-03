@@ -22,7 +22,11 @@
 <main>
     <section id="map-section">
         <div class="toolbar">
-            <button id="reload">Recharger les vélos</button>
+            <label for="api-base">URL du proxy HTTP :</label>
+            <input id="api-base" type="text" placeholder="http://localhost:8080">
+            <button id="save-api">Enregistrer</button>
+            
+            <button id="reload">Recharger</button>
             <span id="status">Prêt.</span>
         </div>
 
