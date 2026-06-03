@@ -1,0 +1,12 @@
+-- Supprimer d'abord les tables dépendantes
+
+DROP TABLE Contient CASCADE CONSTRAINTS;
+DROP TABLE Reservation CASCADE CONSTRAINTS;
+DROP TABLE Commande CASCADE CONSTRAINTS;
+
+-- Ensuite les tables indépendantes restantes
+
+DROP TABLE Plat CASCADE CONSTRAINTS;
+DROP TABLE Client CASCADE CONSTRAINTS;
+DROP TABLE TableResto CASCADE CONSTRAINTS;
+DROP TABLE Restaurant CASCADE CONSTRAINTS;
