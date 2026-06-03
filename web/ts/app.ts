@@ -1,6 +1,6 @@
 import L from 'leaflet';
 
-interface BikeStation {
+interface StationVelo {
     lat: number;
     lon: number;
     name: string;
@@ -28,7 +28,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 const layers = {
-    bikes: L.layerGroup().addTo(map)
+    velos: L.layerGroup().addTo(map)
 };
 
 // si / à la fin, ça l'enlève
@@ -82,24 +82,47 @@ function escapeHtml(value: unknown): string {
 
 // VELO
 async function loadBikes(): Promise<void> {
-    layers.bikes.clearLayers();
+    layers.velos.clearLayers();
 
-    const data = await fetchJson<{ stations: BikeStation[] }>('/api/bikes');
+    // 1. On fait les requêtes en même temps directement vers l'API publique
+    const [infoRes, statusRes] = await Promise.all([
+        fetch('https://api.cyclocity.fr/contracts/nancy/gbfs/v2/station_information.json'),
+        fetch('https://api.cyclocity.fr/contracts/nancy/gbfs/v2/station_status.json')
+    ]);
 
-    data.stations.forEach(station => {
-        // On récupère le nombre de vélos (0 si indéfini)
-        const bikes = station.num_bikes_available ?? 0;
+    if (!infoRes.ok || !statusRes.ok) {
+        throw new Error("Erreur lors de la récupération des données vélos");
+    }
 
+    const infoData = await infoRes.json();
+    const statusData = await statusRes.json();
+
+    const stationsInfo = infoData.data.stations;
+    const stationsStatus = statusData.data.stations;
+
+    // 2. On crée un dictionnaire pour retrouver vite le statut avec l'ID de la station
+    const statusMap = new Map();
+    stationsStatus.forEach((status: any) => {
+        statusMap.set(status.station_id, status);
+    });
+
+    // 3. On parcourt les infos fixes et on fusionne avec le statut en direct
+    stationsInfo.forEach((station: any) => {
+        const status = statusMap.get(station.station_id);
+        
+        // On récupère les compteurs (0 si la station est fermée/introuvable)
+        const bikes = status ? status.num_bikes_available : 0;
+        const docks = status ? status.num_docks_available : 0;
+
+        // 4. On dessine le marqueur
         L.marker([station.lat, station.lon], {
             icon: veloIcon(bikes)
-        })
-            .bindPopup(`
-                <strong>${escapeHtml(station.name)}</strong><br>
-                ${escapeHtml(station.address || '')}<br>
-                <span class="badge">Vélos : ${station.num_bikes_available ?? '?'}</span>
-                <span class="badge">Places : ${station.num_docks_available ?? '?'}</span>
-            `)
-            .addTo(layers.bikes);
+        }).bindPopup(`
+            <strong>${escapeHtml(station.name)}</strong><br>
+            ${escapeHtml(station.address || '')}<br>
+            <span class="badge">Vélos : ${bikes}</span>
+            <span class="badge">Places : ${docks}</span>
+        `).addTo(layers.velos);
     });
 }
 
