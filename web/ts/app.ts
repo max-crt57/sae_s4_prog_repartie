@@ -9,14 +9,6 @@ interface StationVelo {
     num_docks_available?: number;
 }
 
-// DOM
-const defaultApiBase: string = location.port === '8080' ? `${location.protocol}//${location.host}` : 'http://localhost:8080';
-
-const apiBaseInput = document.getElementById('api-base') as HTMLInputElement;
-const statusEl = document.getElementById('status') as HTMLElement;
-
-apiBaseInput.value = localStorage.getItem('API_BASE') || defaultApiBase;
-
 // MAP
 const map = L.map('map');
 
@@ -30,27 +22,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 const layers = {
     velos: L.layerGroup().addTo(map)
 };
-
-// si / à la fin, ça l'enlève
-function apiBase(): string {
-    return apiBaseInput.value.replace(/\/$/, '');
-}
-
-function setStatus(message: string): void {
-    statusEl.textContent = message;
-}
-
-// FETCH
-async function fetchJson<T = any>(path: string, options: RequestInit = {}): Promise<T> {
-    const response = await fetch(`${apiBase()}${path}`, options);
-    const data = await response.json();
-
-    if (!response.ok || data.status === 'error') {
-        throw new Error(data.message || `Erreur HTTP ${response.status}`);
-    }
-
-    return data;
-}
 
 // ICONE
 function veloIcon(bikesAvailable: number = 0): L.DivIcon {
@@ -126,26 +97,6 @@ async function loadBikes(): Promise<void> {
     });
 }
 
-// RELOAD
-async function reloadAll(): Promise<void> {
-    try {
-        setStatus('Chargement...');
-        await Promise.all([loadBikes()]);
-        setStatus('Données chargées.');
-    } catch (e: any) {
-        console.error(e);
-        setStatus(`Erreur : ${e.message}`);
-    }
-}
-
-// EVENTS
-document.getElementById('save-api')!.addEventListener('click', () => {
-    localStorage.setItem('API_BASE', apiBase());
-    setStatus(`Proxy enregistré : ${apiBase()}`);
-});
-
-document.getElementById('reload')!.addEventListener('click', reloadAll);
-
 document.getElementById('tab-map')!.addEventListener('click', () => switchTab('map'));
 document.getElementById('tab-report')!.addEventListener('click', () => switchTab('report'));
 
@@ -159,8 +110,14 @@ function switchTab(tab: 'map' | 'report'): void {
     if (tab === 'map') setTimeout(() => map.invalidateSize(), 50);
 }
 
-// INIT
-reloadAll();
+loadBikes().catch(err => console.error("Erreur au chargement des vélos:", err));
+
+document.getElementById('reload')!.addEventListener('click', () => {
+    const statusSpan = document.getElementById('status')!;
+    statusSpan.textContent = "Chargement...";
+    
+    loadBikes().then(() => statusSpan.textContent = "Prêt.").catch(err => statusSpan.textContent = "Erreur !");
+});
 
 window.addEventListener('load', () => {
     setTimeout(() => map.invalidateSize(), 100);

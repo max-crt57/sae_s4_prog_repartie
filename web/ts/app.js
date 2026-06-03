@@ -9577,10 +9577,6 @@
 
   // ts/app.ts
   var import_leaflet = __toESM(require_leaflet_src());
-  var defaultApiBase = location.port === "8080" ? `${location.protocol}//${location.host}` : "http://localhost:8080";
-  var apiBaseInput = document.getElementById("api-base");
-  var statusEl = document.getElementById("status");
-  apiBaseInput.value = localStorage.getItem("API_BASE") || defaultApiBase;
   var map = import_leaflet.default.map("map");
   map.setView([48.6921, 6.1844], 13);
   import_leaflet.default.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -9590,12 +9586,6 @@
   var layers = {
     velos: import_leaflet.default.layerGroup().addTo(map)
   };
-  function apiBase() {
-    return apiBaseInput.value.replace(/\/$/, "");
-  }
-  function setStatus(message) {
-    statusEl.textContent = message;
-  }
   function veloIcon(bikesAvailable = 0) {
     const statusClass = bikesAvailable > 0 ? "dispo" : "vide";
     const bikeSvg = `<svg viewBox="0 0 24 24"><path d="M15.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM5 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5zm5.8-10l2.4-2.4.8.8c1.3 1.3 3 2.1 5.1 2.1V9c-1.5 0-2.7-.6-3.6-1.5l-1.9-1.9c-.5-.4-1-.6-1.6-.6s-1.1.2-1.4.6L7.8 8.4c-.4.4-.6.9-.6 1.4 0 .6.2 1.1.6 1.4L11 14v5h2v-6.2l-2.2-2.3zM19 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5z"/></svg>`;
@@ -9650,21 +9640,6 @@
         `).addTo(layers.velos);
     });
   }
-  async function reloadAll() {
-    try {
-      setStatus("Chargement...");
-      await Promise.all([loadBikes()]);
-      setStatus("Donn\xE9es charg\xE9es.");
-    } catch (e) {
-      console.error(e);
-      setStatus(`Erreur : ${e.message}`);
-    }
-  }
-  document.getElementById("save-api").addEventListener("click", () => {
-    localStorage.setItem("API_BASE", apiBase());
-    setStatus(`Proxy enregistr\xE9 : ${apiBase()}`);
-  });
-  document.getElementById("reload").addEventListener("click", reloadAll);
   document.getElementById("tab-map").addEventListener("click", () => switchTab("map"));
   document.getElementById("tab-report").addEventListener("click", () => switchTab("report"));
   function switchTab(tab) {
@@ -9674,7 +9649,12 @@
     document.getElementById("tab-report").classList.toggle("active", tab === "report");
     if (tab === "map") setTimeout(() => map.invalidateSize(), 50);
   }
-  reloadAll();
+  loadBikes().catch((err) => console.error("Erreur au chargement des v\xE9los:", err));
+  document.getElementById("reload").addEventListener("click", () => {
+    const statusSpan = document.getElementById("status");
+    statusSpan.textContent = "Chargement...";
+    loadBikes().then(() => statusSpan.textContent = "Pr\xEAt.").catch((err) => statusSpan.textContent = "Erreur !");
+  });
   window.addEventListener("load", () => {
     setTimeout(() => map.invalidateSize(), 100);
   });
