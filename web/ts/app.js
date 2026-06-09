@@ -1968,7 +1968,7 @@
             return 1 - Math.pow(1 - t, this._easeOutPower);
           }
         });
-        var Map = Evented.extend({
+        var Map2 = Evented.extend({
           options: {
             // @section Map State Options
             // @option crs: CRS = L.CRS.EPSG3857
@@ -3182,7 +3182,7 @@
           }
         });
         function createMap(id, options) {
-          return new Map(id, options);
+          return new Map2(id, options);
         }
         var Control = Class.extend({
           // @section
@@ -3261,7 +3261,7 @@
         var control = function(options) {
           return new Control(options);
         };
-        Map.include({
+        Map2.include({
           // @method addControl(control: Control): this
           // Adds the given control to the map
           addControl: function(control2) {
@@ -3674,10 +3674,10 @@
             }
           }
         });
-        Map.mergeOptions({
+        Map2.mergeOptions({
           zoomControl: true
         });
-        Map.addInitHook(function() {
+        Map2.addInitHook(function() {
           if (this.options.zoomControl) {
             this.zoomControl = new Zoom();
             this.addControl(this.zoomControl);
@@ -3855,10 +3855,10 @@
             this._container.innerHTML = prefixAndAttribs.join(' <span aria-hidden="true">|</span> ');
           }
         });
-        Map.mergeOptions({
+        Map2.mergeOptions({
           attributionControl: true
         });
-        Map.addInitHook(function() {
+        Map2.addInitHook(function() {
           if (this.options.attributionControl) {
             new Attribution().addTo(this);
           }
@@ -4479,7 +4479,7 @@
             map2.fire("layeradd", { layer: this });
           }
         });
-        Map.include({
+        Map2.include({
           // @method addLayer(layer: Layer): this
           // Adds the given layer to the map
           addLayer: function(layer) {
@@ -6581,7 +6581,7 @@
             return [0, 0];
           }
         });
-        Map.include({
+        Map2.include({
           _initOverlay: function(OverlayClass, content, latlng, options) {
             var overlay = content;
             if (!(overlay instanceof OverlayClass)) {
@@ -6794,10 +6794,10 @@
         var popup = function(options, source) {
           return new Popup(options, source);
         };
-        Map.mergeOptions({
+        Map2.mergeOptions({
           closePopupOnClick: true
         });
-        Map.include({
+        Map2.include({
           // @method openPopup(popup: Popup): this
           // Opens the specified popup while closing the previously opened (to make sure only one is opened at one time for usability).
           // @alternative
@@ -7038,7 +7038,7 @@
         var tooltip = function(options, source) {
           return new Tooltip(options, source);
         };
-        Map.include({
+        Map2.include({
           // @method openTooltip(tooltip: Tooltip): this
           // Opens the specified tooltip.
           // @alternative
@@ -8787,7 +8787,7 @@
         function svg(options) {
           return Browser.svg || Browser.vml ? new SVG(options) : null;
         }
-        Map.include({
+        Map2.include({
           // @namespace Map; @method getRenderer(layer: Path): Renderer
           // Returns the instance of `Renderer` that should be used to render the given
           // `Path`. It will ensure that the `renderer` options of the map and paths
@@ -8848,7 +8848,7 @@
         GeoJSON.latLngsToCoords = latLngsToCoords;
         GeoJSON.getFeature = getFeature;
         GeoJSON.asFeature = asFeature;
-        Map.mergeOptions({
+        Map2.mergeOptions({
           // @option boxZoom: Boolean = true
           // Whether the map can be zoomed to a rectangular area specified by
           // dragging the mouse while pressing the shift key.
@@ -8952,8 +8952,8 @@
             }
           }
         });
-        Map.addInitHook("addHandler", "boxZoom", BoxZoom);
-        Map.mergeOptions({
+        Map2.addInitHook("addHandler", "boxZoom", BoxZoom);
+        Map2.mergeOptions({
           // @option doubleClickZoom: Boolean|String = true
           // Whether the map can be zoomed in by double clicking on it and
           // zoomed out by double clicking while holding shift. If passed
@@ -8977,8 +8977,8 @@
             }
           }
         });
-        Map.addInitHook("addHandler", "doubleClickZoom", DoubleClickZoom);
-        Map.mergeOptions({
+        Map2.addInitHook("addHandler", "doubleClickZoom", DoubleClickZoom);
+        Map2.mergeOptions({
           // @option dragging: Boolean = true
           // Whether the map is draggable with mouse/touch or not.
           dragging: true,
@@ -9137,8 +9137,8 @@
             }
           }
         });
-        Map.addInitHook("addHandler", "dragging", Drag);
-        Map.mergeOptions({
+        Map2.addInitHook("addHandler", "dragging", Drag);
+        Map2.mergeOptions({
           // @option keyboard: Boolean = true
           // Makes the map focusable and allows users to navigate the map with keyboard
           // arrows and `+`/`-` keys.
@@ -9265,8 +9265,8 @@
             stop(e);
           }
         });
-        Map.addInitHook("addHandler", "keyboard", Keyboard);
-        Map.mergeOptions({
+        Map2.addInitHook("addHandler", "keyboard", Keyboard);
+        Map2.mergeOptions({
           // @section Mouse wheel options
           // @option scrollWheelZoom: Boolean|String = true
           // Whether the map can be zoomed by using the mouse wheel. If passed `'center'`,
@@ -9319,9 +9319,9 @@
             }
           }
         });
-        Map.addInitHook("addHandler", "scrollWheelZoom", ScrollWheelZoom);
+        Map2.addInitHook("addHandler", "scrollWheelZoom", ScrollWheelZoom);
         var tapHoldDelay = 600;
-        Map.mergeOptions({
+        Map2.mergeOptions({
           // @section Touch interaction options
           // @option tapHold: Boolean
           // Enables simulation of `contextmenu` event, default is `true` for mobile Safari.
@@ -9390,8 +9390,8 @@
             e.target.dispatchEvent(simulatedEvent);
           }
         });
-        Map.addInitHook("addHandler", "tapHold", TapHold);
-        Map.mergeOptions({
+        Map2.addInitHook("addHandler", "tapHold", TapHold);
+        Map2.mergeOptions({
           // @section Touch interaction options
           // @option touchZoom: Boolean|String = *
           // Whether the map can be zoomed by touch-dragging with two fingers. If
@@ -9479,14 +9479,14 @@
             }
           }
         });
-        Map.addInitHook("addHandler", "touchZoom", TouchZoom);
-        Map.BoxZoom = BoxZoom;
-        Map.DoubleClickZoom = DoubleClickZoom;
-        Map.Drag = Drag;
-        Map.Keyboard = Keyboard;
-        Map.ScrollWheelZoom = ScrollWheelZoom;
-        Map.TapHold = TapHold;
-        Map.TouchZoom = TouchZoom;
+        Map2.addInitHook("addHandler", "touchZoom", TouchZoom);
+        Map2.BoxZoom = BoxZoom;
+        Map2.DoubleClickZoom = DoubleClickZoom;
+        Map2.Drag = Drag;
+        Map2.Keyboard = Keyboard;
+        Map2.ScrollWheelZoom = ScrollWheelZoom;
+        Map2.TapHold = TapHold;
+        Map2.TouchZoom = TouchZoom;
         exports2.Bounds = Bounds;
         exports2.Browser = Browser;
         exports2.CRS = CRS;
@@ -9512,7 +9512,7 @@
         exports2.Layer = Layer;
         exports2.LayerGroup = LayerGroup;
         exports2.LineUtil = LineUtil;
-        exports2.Map = Map;
+        exports2.Map = Map2;
         exports2.Marker = Marker;
         exports2.Mixin = Mixin;
         exports2.Path = Path;
@@ -9581,6 +9581,12 @@
   var apiBaseInput = document.getElementById("api-base");
   var statusEl = document.getElementById("status");
   apiBaseInput.value = localStorage.getItem("API_BASE") || defaultApiBase;
+  function apiBase() {
+    return apiBaseInput.value.replace(/\/$/, "");
+  }
+  function setStatus(message) {
+    statusEl.textContent = message;
+  }
   var map = import_leaflet.default.map("map");
   map.setView([48.6921, 6.1844], 13);
   import_leaflet.default.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -9588,22 +9594,9 @@
     attribution: "&copy; OpenStreetMap"
   }).addTo(map);
   var layers = {
-    bikes: import_leaflet.default.layerGroup().addTo(map)
+    velos: import_leaflet.default.layerGroup().addTo(map),
+    incidents: import_leaflet.default.layerGroup().addTo(map)
   };
-  function apiBase() {
-    return apiBaseInput.value.replace(/\/$/, "");
-  }
-  function setStatus(message) {
-    statusEl.textContent = message;
-  }
-  async function fetchJson(path, options = {}) {
-    const response = await fetch(`${apiBase()}${path}`, options);
-    const data = await response.json();
-    if (!response.ok || data.status === "error") {
-      throw new Error(data.message || `Erreur HTTP ${response.status}`);
-    }
-    return data;
-  }
   function veloIcon(bikesAvailable = 0) {
     const statusClass = bikesAvailable > 0 ? "dispo" : "vide";
     const bikeSvg = `<svg viewBox="0 0 24 24"><path d="M15.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM5 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5zm5.8-10l2.4-2.4.8.8c1.3 1.3 3 2.1 5.1 2.1V9c-1.5 0-2.7-.6-3.6-1.5l-1.9-1.9c-.5-.4-1-.6-1.6-.6s-1.1.2-1.4.6L7.8 8.4c-.4.4-.6.9-.6 1.4 0 .6.2 1.1.6 1.4L11 14v5h2v-6.2l-2.2-2.3zM19 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5z"/></svg>`;
@@ -9627,36 +9620,77 @@
       '"': "&quot;"
     })[c]);
   }
+  function incidentIcon() {
+    return import_leaflet.default.divIcon({
+      className: "custom-leaflet-icon",
+      html: `<div class="incident-pin" style="background-color: #f39c12; font-size: 16px;"><span>!</span></div>`,
+      iconSize: [30, 42],
+      iconAnchor: [15, 34],
+      popupAnchor: [0, -30]
+    });
+  }
+  function parsePolylinePoint(polyline) {
+    if (!polyline) return null;
+    const parts = polyline.trim().split(/\s+/).map(Number);
+    if (parts.length < 2 || Number.isNaN(parts[0]) || Number.isNaN(parts[1])) return null;
+    return [parts[0], parts[1]];
+  }
   async function loadBikes() {
-    layers.bikes.clearLayers();
-    const data = await fetchJson("/api/bikes");
-    data.stations.forEach((station) => {
-      const bikes = station.num_bikes_available ?? 0;
+    layers.velos.clearLayers();
+    const [infoRes, statusRes] = await Promise.all([
+      fetch("https://api.cyclocity.fr/contracts/nancy/gbfs/v2/station_information.json"),
+      fetch("https://api.cyclocity.fr/contracts/nancy/gbfs/v2/station_status.json")
+    ]);
+    if (!infoRes.ok || !statusRes.ok) {
+      throw new Error("Erreur lors de la r\xE9cup\xE9ration des donn\xE9es v\xE9los");
+    }
+    const infoData = await infoRes.json();
+    const statusData = await statusRes.json();
+    const stationsInfo = infoData.data.stations;
+    const stationsStatus = statusData.data.stations;
+    const statusMap = /* @__PURE__ */ new Map();
+    stationsStatus.forEach((status) => {
+      statusMap.set(status.station_id, status);
+    });
+    stationsInfo.forEach((station) => {
+      const status = statusMap.get(station.station_id);
+      const bikes = status ? status.num_bikes_available : 0;
+      const docks = status ? status.num_docks_available : 0;
       import_leaflet.default.marker([station.lat, station.lon], {
         icon: veloIcon(bikes)
       }).bindPopup(`
-                <strong>${escapeHtml(station.name)}</strong><br>
-                ${escapeHtml(station.address || "")}<br>
-                <span class="badge">V\xE9los : ${station.num_bikes_available ?? "?"}</span>
-                <span class="badge">Places : ${station.num_docks_available ?? "?"}</span>
-            `).addTo(layers.bikes);
+            <strong>${escapeHtml(station.name)}</strong><br>
+            ${escapeHtml(station.address || "")}<br>
+            <span class="badge">V\xE9los : ${bikes}</span>
+            <span class="badge">Places : ${docks}</span>
+        `).addTo(layers.velos);
     });
   }
-  async function reloadAll() {
-    try {
-      setStatus("Chargement...");
-      await Promise.all([loadBikes()]);
-      setStatus("Donn\xE9es charg\xE9es.");
-    } catch (e) {
-      console.error(e);
-      setStatus(`Erreur : ${e.message}`);
+  async function loadIncidents() {
+    layers.incidents.clearLayers();
+    const response = await fetch(`${apiBase()}/api/incidents`);
+    if (!response.ok) throw new Error("Erreur lors de la r\xE9cup\xE9ration des incidents");
+    const data = await response.json();
+    if (data.incidents) {
+      data.incidents.forEach((incident) => {
+        const coords = parsePolylinePoint(incident.location?.polyline);
+        if (coords) {
+          const dateDebut = new Date(incident.starttime).toLocaleDateString("fr-FR");
+          const dateFin = new Date(incident.endtime).toLocaleDateString("fr-FR");
+          import_leaflet.default.marker(coords, { icon: incidentIcon() }).bindPopup(`
+                        <strong>Incident : ${escapeHtml(incident.short_description)}</strong><br>
+                        <em>${escapeHtml(incident.location.location_description)}</em><br>
+                        <hr style="margin: 5px 0;">
+                        <span class="badge">Du ${dateDebut} au ${dateFin}</span>
+                    `).addTo(layers.incidents);
+        }
+      });
     }
   }
   document.getElementById("save-api").addEventListener("click", () => {
     localStorage.setItem("API_BASE", apiBase());
     setStatus(`Proxy enregistr\xE9 : ${apiBase()}`);
   });
-  document.getElementById("reload").addEventListener("click", reloadAll);
   document.getElementById("tab-map").addEventListener("click", () => switchTab("map"));
   document.getElementById("tab-report").addEventListener("click", () => switchTab("report"));
   function switchTab(tab) {
@@ -9666,7 +9700,12 @@
     document.getElementById("tab-report").classList.toggle("active", tab === "report");
     if (tab === "map") setTimeout(() => map.invalidateSize(), 50);
   }
-  reloadAll();
+  Promise.all([loadBikes(), loadIncidents()]).catch((err) => console.error("Erreur au chargement:", err));
+  document.getElementById("reload").addEventListener("click", () => {
+    const statusSpan = document.getElementById("status");
+    statusSpan.textContent = "Chargement...";
+    Promise.all([loadBikes(), loadIncidents()]).then(() => statusSpan.textContent = "Pr\xEAt.").catch((err) => statusSpan.textContent = "Erreur !");
+  });
   window.addEventListener("load", () => {
     setTimeout(() => map.invalidateSize(), 100);
   });

@@ -1,8 +1,7 @@
 package iut.sae;
 
-import com.sun.net.httpserver.HttpServer;
-
 import java.net.InetSocketAddress;
+import com.sun.net.httpserver.HttpServer;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -17,6 +16,29 @@ public class Main {
             exchange.sendResponseHeaders(200, response.getBytes().length);
             exchange.getResponseBody().write(response.getBytes());
             exchange.close();
+        });
+
+        server.createContext("/api/incidents", exchange -> {
+            try {
+                String jsonResponse = IncidentService.fetchIncidents();
+
+                exchange.getResponseHeaders().add("Content-Type", "application/json; charset=UTF-8");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+                
+                byte[] bytes = jsonResponse.getBytes("UTF-8");
+                exchange.sendResponseHeaders(200, bytes.length);
+                exchange.getResponseBody().write(bytes);
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+                String error = "{\"status\":\"error\", \"message\":\"" + e.getMessage() + "\"}";
+                try {
+                    exchange.sendResponseHeaders(500, error.getBytes().length);
+                    exchange.getResponseBody().write(error.getBytes());
+                } catch (Exception ex) {}
+            } finally {
+                exchange.close();
+            }
         });
 
         server.start();

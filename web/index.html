@@ -14,20 +14,19 @@
     <h1>SAE Application Répartie - Nancy</h1>
 
     <nav>
-        <button>Carte</button>
-        <button>Compte rendu</button>
+        <button id="tab-map" class="active">Carte</button>
+        <button id="tab-report">Compte rendu</button>
     </nav>
 </header>
 
 <main>
     <section id="map-section">
         <div class="toolbar">
-            <label>URL du proxy HTTP :</label>
-
+            <label for="api-base">URL du proxy HTTP :</label>
             <input id="api-base" type="text" placeholder="http://localhost:8080">
             <button id="save-api">Enregistrer</button>
-            <button id="reload">Recharger les données</button>
-
+            
+            <button id="reload">Recharger</button>
             <span id="status">Prêt.</span>
         </div>
 
