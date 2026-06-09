@@ -11,3 +11,5 @@ web/package-lock.json
 proxy-java/target/
 web/node_modules
 web/ts/app.js
+
+config.properties
