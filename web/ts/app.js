@@ -9575,20 +9575,9 @@
     }
   });
 
-  // ts/app.ts
+  // ts/mapUtils.ts
   var import_leaflet = __toESM(require_leaflet_src());
-  var defaultApiBase = location.port === "8080" ? `${location.protocol}//${location.host}` : "http://localhost:8080";
-  var apiBaseInput = document.getElementById("api-base");
-  var statusEl = document.getElementById("status");
-  apiBaseInput.value = localStorage.getItem("API_BASE") || defaultApiBase;
-  function apiBase() {
-    return apiBaseInput.value.replace(/\/$/, "");
-  }
-  function setStatus(message) {
-    statusEl.textContent = message;
-  }
-  var map = import_leaflet.default.map("map");
-  map.setView([48.6921, 6.1844], 13);
+  var map = import_leaflet.default.map("map").setView([48.6921, 6.1844], 13);
   import_leaflet.default.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
     attribution: "&copy; OpenStreetMap"
@@ -9604,11 +9593,17 @@
       className: "custom-leaflet-icon",
       html: `<div class="velo-pin ${statusClass}">${bikeSvg}</div>`,
       iconSize: [30, 42],
-      // Taille totale (le pin dépasse de la boite)
       iconAnchor: [15, 34],
-      // Pointe exacte sur la carte (moitié largeur, bas du pin)
       popupAnchor: [0, -30]
-      // Le popup s'ouvrira juste au-dessus du pin
+    });
+  }
+  function incidentIcon() {
+    return import_leaflet.default.divIcon({
+      className: "custom-leaflet-icon",
+      html: `<div class="incident-pin" style="background-color: #f39c12; font-size: 16px;"><span>!</span></div>`,
+      iconSize: [30, 42],
+      iconAnchor: [15, 34],
+      popupAnchor: [0, -30]
     });
   }
   function escapeHtml(value) {
@@ -9620,20 +9615,23 @@
       '"': "&quot;"
     })[c]);
   }
-  function incidentIcon() {
-    return import_leaflet.default.divIcon({
-      className: "custom-leaflet-icon",
-      html: `<div class="incident-pin" style="background-color: #f39c12; font-size: 16px;"><span>!</span></div>`,
-      iconSize: [30, 42],
-      iconAnchor: [15, 34],
-      popupAnchor: [0, -30]
-    });
-  }
   function parsePolylinePoint(polyline) {
     if (!polyline) return null;
     const parts = polyline.trim().split(/\s+/).map(Number);
     if (parts.length < 2 || Number.isNaN(parts[0]) || Number.isNaN(parts[1])) return null;
     return [parts[0], parts[1]];
+  }
+
+  // ts/app.ts
+  var defaultApiBase = location.port === "8080" ? `${location.protocol}//${location.host}` : "http://localhost:8080";
+  var apiBaseInput = document.getElementById("api-base");
+  var statusEl = document.getElementById("status");
+  apiBaseInput.value = localStorage.getItem("API_BASE") || defaultApiBase;
+  function apiBase() {
+    return apiBaseInput.value.replace(/\/$/, "");
+  }
+  function setStatus(message) {
+    statusEl.textContent = message;
   }
   async function loadBikes() {
     layers.velos.clearLayers();
@@ -9641,49 +9639,45 @@
       fetch("https://api.cyclocity.fr/contracts/nancy/gbfs/v2/station_information.json"),
       fetch("https://api.cyclocity.fr/contracts/nancy/gbfs/v2/station_status.json")
     ]);
-    if (!infoRes.ok || !statusRes.ok) {
-      throw new Error("Erreur lors de la r\xE9cup\xE9ration des donn\xE9es v\xE9los");
-    }
+    if (!infoRes.ok || !statusRes.ok) throw new Error("Erreur API V\xE9los");
     const infoData = await infoRes.json();
     const statusData = await statusRes.json();
-    const stationsInfo = infoData.data.stations;
-    const stationsStatus = statusData.data.stations;
     const statusMap = /* @__PURE__ */ new Map();
-    stationsStatus.forEach((status) => {
-      statusMap.set(status.station_id, status);
-    });
-    stationsInfo.forEach((station) => {
+    statusData.data.stations.forEach((status) => statusMap.set(status.station_id, status));
+    infoData.data.stations.forEach((station) => {
       const status = statusMap.get(station.station_id);
       const bikes = status ? status.num_bikes_available : 0;
       const docks = status ? status.num_docks_available : 0;
-      import_leaflet.default.marker([station.lat, station.lon], {
-        icon: veloIcon(bikes)
-      }).bindPopup(`
-            <strong>${escapeHtml(station.name)}</strong><br>
-            ${escapeHtml(station.address || "")}<br>
-            <span class="badge">V\xE9los : ${bikes}</span>
-            <span class="badge">Places : ${docks}</span>
-        `).addTo(layers.velos);
+      Promise.resolve().then(() => __toESM(require_leaflet_src())).then((L3) => {
+        L3.marker([station.lat, station.lon], { icon: veloIcon(bikes) }).bindPopup(`
+                <strong>${escapeHtml(station.name)}</strong><br>
+                ${escapeHtml(station.address || "")}<br>
+                <span class="badge">V\xE9los : ${bikes}</span>
+                <span class="badge">Places : ${docks}</span>
+            `).addTo(layers.velos);
+      });
     });
   }
   async function loadIncidents() {
     layers.incidents.clearLayers();
     const response = await fetch(`${apiBase()}/api/incidents`);
-    if (!response.ok) throw new Error("Erreur lors de la r\xE9cup\xE9ration des incidents");
+    if (!response.ok) throw new Error("Erreur API Incidents");
     const data = await response.json();
     if (data.incidents) {
-      data.incidents.forEach((incident) => {
-        const coords = parsePolylinePoint(incident.location?.polyline);
-        if (coords) {
-          const dateDebut = new Date(incident.starttime).toLocaleDateString("fr-FR");
-          const dateFin = new Date(incident.endtime).toLocaleDateString("fr-FR");
-          import_leaflet.default.marker(coords, { icon: incidentIcon() }).bindPopup(`
+      Promise.resolve().then(() => __toESM(require_leaflet_src())).then((L3) => {
+        data.incidents.forEach((incident) => {
+          const coords = parsePolylinePoint(incident.location?.polyline);
+          if (coords) {
+            const dateDebut = new Date(incident.starttime).toLocaleDateString("fr-FR");
+            const dateFin = new Date(incident.endtime).toLocaleDateString("fr-FR");
+            L3.marker(coords, { icon: incidentIcon() }).bindPopup(`
                         <strong>Incident : ${escapeHtml(incident.short_description)}</strong><br>
                         <em>${escapeHtml(incident.location.location_description)}</em><br>
                         <hr style="margin: 5px 0;">
                         <span class="badge">Du ${dateDebut} au ${dateFin}</span>
                     `).addTo(layers.incidents);
-        }
+          }
+        });
       });
     }
   }
@@ -9691,8 +9685,10 @@
     localStorage.setItem("API_BASE", apiBase());
     setStatus(`Proxy enregistr\xE9 : ${apiBase()}`);
   });
-  document.getElementById("tab-map").addEventListener("click", () => switchTab("map"));
-  document.getElementById("tab-report").addEventListener("click", () => switchTab("report"));
+  document.getElementById("reload").addEventListener("click", () => {
+    setStatus("Chargement...");
+    Promise.all([loadBikes(), loadIncidents()]).then(() => setStatus("Pr\xEAt.")).catch((err) => setStatus("Erreur !"));
+  });
   function switchTab(tab) {
     document.getElementById("map-section").classList.toggle("hidden", tab !== "map");
     document.getElementById("report-section").classList.toggle("hidden", tab !== "report");
@@ -9700,15 +9696,10 @@
     document.getElementById("tab-report").classList.toggle("active", tab === "report");
     if (tab === "map") setTimeout(() => map.invalidateSize(), 50);
   }
-  Promise.all([loadBikes(), loadIncidents()]).catch((err) => console.error("Erreur au chargement:", err));
-  document.getElementById("reload").addEventListener("click", () => {
-    const statusSpan = document.getElementById("status");
-    statusSpan.textContent = "Chargement...";
-    Promise.all([loadBikes(), loadIncidents()]).then(() => statusSpan.textContent = "Pr\xEAt.").catch((err) => statusSpan.textContent = "Erreur !");
-  });
-  window.addEventListener("load", () => {
-    setTimeout(() => map.invalidateSize(), 100);
-  });
+  document.getElementById("tab-map").addEventListener("click", () => switchTab("map"));
+  document.getElementById("tab-report").addEventListener("click", () => switchTab("report"));
+  window.addEventListener("load", () => setTimeout(() => map.invalidateSize(), 100));
+  Promise.all([loadBikes(), loadIncidents()]).catch((err) => console.error(err));
 })();
 /*! Bundled license information:
 
