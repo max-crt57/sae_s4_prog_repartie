@@ -1,8 +1,13 @@
 *.class
 *.env
-/.idea/
-/out/
+.idea/
+out/
 *.map
-/node_modules/
+web/ts/app.js
+web/ts/app.js.map
+app.js.map
+node_modules/
 web/package-lock.json
-/proxy-java/target/
+proxy-java/target/
+web/node_modules
+web/ts/app.js
