@@ -39,42 +39,74 @@
 
             <div class="report-card">
                 <h3>Architecture de l'application</h3>
-                <p>L'application respecte une architecture répartie permettant de contourner les restrictions CORS des navigateurs :</p>
+                <p>L'application respecte une architecture répartie complète, combinant Web, Proxy HTTP, RMI et Base de données :</p>
                 <ul>
-                    <li><strong>Front-end (Client) :</strong> Développé en HTML/CSS et TypeScript. Utilisation de Leaflet.js pour la cartographie. Transpilé avec esbuild.</li>
-                    <li><strong>Back-end (Proxy Java) :</strong> Un serveur HTTP personnalisé utilisant <code>com.sun.net.httpserver</code>. Il agit comme un pont pour interroger les données distantes.</li>
-                    <li><strong>APIs Distantes :</strong> JCDecaux (Norme GBFS pour les vélos) et API de la Métropole du Grand Nancy (Incidents).</li>
+                    <li><strong>Front-end (Client) :</strong> HTML/CSS et TypeScript avec Leaflet.js. Transpilé avec <code>esbuild</code>.</li>
+                    <li><strong>Back-end (Proxy Java) :</strong> Serveur HTTP (<code>com.sun.net.httpserver</code>) gérant le contournement CORS et faisant le pont entre le client web et les services distants.</li>
+                    <li><strong>APIs Ouvertes :</strong> JCDecaux (vélos) interrogé par le client Web. Métropole du Grand Nancy (incidents) interrogé par le Proxy Java (<code>HttpClient</code>).</li>
+                    <li><strong>Serveur RMI & BDD :</strong> Service Java distant accédant à une base de données via JDBC pour gérer les restaurants et réservations. Le Proxy agit comme client RMI.</li>
                 </ul>
-                <div class="schema-placeholder">
-                    <em>[Insérer le schéma de l'architecture ici]</em>
+                
+                <div class="schema-placeholder" style="background-color: white; border: none; height: auto;">
+                    <img src="images/architecture.png" alt="Schéma de l'architecture PlantUML" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px;">
                 </div>
             </div>
 
             <div class="report-card">
                 <h3>Ce qui a été fait</h3>
                 <ul>
-                    <li>Mise en place de la carte interactive Leaflet centrée sur Nancy.</li>
-                    <li>Récupération et fusion des données GBFS (Informations et Statuts) pour les stations de vélos.</li>
-                    <li>Création d'un Proxy Java pour contourner le blocage CORS de l'API des incidents de voirie.</li>
-                    <li>Création d'icônes dynamiques (vert/rouge pour les vélos selon la disponibilité).</li>
-                    <li>Séparation du code TypeScript en modules (Data, Map, App).</li>
+                    <li><strong>Front-end :</strong> Mise en place de la carte interactive Leaflet avec un code TypeScript modulaire (Data, Map, App).</li>
+                    <li><strong>Open Data (Vélos) :</strong> Récupération, fusion des données GBFS et affichage avec des icônes dynamiques de disponibilité.</li>
+                    <li><strong>Open Data (Incidents) :</strong> Création d'un Proxy HTTP en Java pour interroger l'API bloquée par CORS et l'exposer au client.</li>
+                    <li><strong>Service RMI (Restaurants) :</strong> Développement d'un serveur RMI interrogeant une base de données SQL pour récupérer la liste des restaurants (Nom, adresse, GPS).</li>
+                    <li><strong>Fonction Réservation :</strong> Implémentation d'une méthode RMI permettant de réserver une table (Nom, nb convives, téléphone).</li>
+                    <li><strong>Passerelle JSON :</strong> Connexion du Proxy Java au serveur RMI pour exposer les données des restaurants au format JSON exploitable par la carte Leaflet.</li>
+                    <li><strong>Build & Gestion :</strong> Utilisation de Maven pour gérer les dépendances Java et npm pour le TypeScript.</li>
                 </ul>
             </div>
 
             <div class="report-card">
                 <h3>Manuel d'utilisation</h3>
-                <ol>
-                    <li>Lancer le serveur Proxy Java (<code>Main.java</code>) sur le port 8080.</li>
-                    <li>Ouvrir le projet Front-end avec un serveur local (ex: Live Server sur VS Code).</li>
-                    <li>Dans la barre d'outils de la carte, vérifier que l'URL du proxy pointe bien vers <code>http://localhost:8080</code>.</li>
-                    <li>Cliquer sur "Recharger" pour synchroniser les données en temps réel.</li>
-                </ol>
+                <p><strong>Prérequis :</strong> Java 17+ et Maven installés.</p>
+                <p>Ouvrir 2 terminaux depuis la racine du projet et lancer les commandes dans cet ordre :</p>
+                
+                <div class="manuel-section">
+                    <h4>1. Importer la base de données</h4>
+                    <p>Importer le contenu du fichier <code>sql/script.sql</code> dans SQLDeveloper.</p>
+                </div>
+
+                <div class="manuel-section">
+                    <h4>2. Serveur RMI (Terminal 1)</h4>
+                    <p>Créer un fichier <code>config.properties</code> dans <code>rmi/rmi-restaurant/</code> en se basant sur le fichier <code>.example</code>. Puis, lancer le serveur :</p>
+                    <div class="code-block">
+cd rmi/rmi-restaurant<br>
+mvn clean install<br>
+mvn exec:java
+                    </div>
+                    <p><em>Le serveur affiche <code>Service Restaurant pret.</code> et reste actif. Ne pas fermer ce terminal.</em></p>
+                </div>
+
+                <div class="manuel-section">
+                    <h4>3. Proxy Java (Terminal 2)</h4>
+                    <p>Lancer le serveur HTTP intermédiaire :</p>
+                    <div class="code-block">
+cd proxy-java<br>
+mvn clean compile<br>
+mvn exec:java
+                    </div>
+                    <p><em>Le proxy se lance sur <code>http://localhost:8080</code>.</em></p>
+                </div>
+
+                <div class="manuel-section">
+                    <h4>Arrêter les serveurs</h4>
+                    <p>Faire <code>Ctrl+C</code> dans chaque terminal.</p>
+                </div>
             </div>
 
             <div class="report-card">
                 <h3>Dépôt Git</h3>
-                <p>Retrouvez l'intégralité du code source (Java et Web) sur notre dépôt Git :</p>
-                <a href="https://github.com/max-crt57/sae_s4_prog_repartie.git" target="_blank" class="git-link">Accéder au dépôt GitHub / GitLab</a>
+                <p>Retrouvez l'intégralité du code source (Java et Web) structuré de manière professionnelle sur notre dépôt Git :</p>
+                <a href="https://github.com/max-crt57/sae_s4_prog_repartie.git" target="_blank" class="git-link">Accéder au dépôt GitHub</a>
             </div>
         </div>
     </section>
