@@ -4,6 +4,7 @@ import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 import rmi.sae.db.DBConnection;
@@ -17,10 +18,9 @@ public class RestaurantServiceImpl implements RestaurantService {
 
         try (
                 Connection conn = DBConnection.getInstance().getConnection();
-
                 Statement st = conn.createStatement();
-
-                ResultSet rs = st.executeQuery("SELECT idRest, nomRest, latitude, longitude FROM Restaurant");) {
+                ResultSet rs = st.executeQuery(
+                        "SELECT idRest, nomRest, latitude, longitude, ouvertureMin, fermetureMin FROM Restaurant");) {
             boolean first = true;
             while (rs.next()) {
                 if (!first) {
@@ -36,21 +36,27 @@ public class RestaurantServiceImpl implements RestaurantService {
                         .append(rs.getString("nomRest"))
                         .append("\",")
 
-                        .append("\"adresse\":\"")
-                        .append(rs.getString("adresse"))
-                        .append("\",")
-
                         .append("\"latitude\":")
                         .append(rs.getDouble("latitude"))
                         .append(",")
 
                         .append("\"longitude\":")
                         .append(rs.getDouble("longitude"))
+                        .append(",")
+
+                        .append("\"ouvertureMin\":")
+                        .append(rs.getInt("ouvertureMin"))
+                        .append(",")
+
+                        .append("\"fermetureMin\":")
+                        .append(rs.getInt("fermetureMin"))
 
                         .append("}");
                 first = false;
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
+            e.printStackTrace();
+
             return """
                     {
                         "success":false,

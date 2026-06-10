@@ -13,3 +13,6 @@ web/node_modules
 web/ts/app.js
 
 config.properties
+
+target/
+rmi/rmi-restaurant/target/
