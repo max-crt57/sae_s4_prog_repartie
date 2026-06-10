@@ -14,6 +14,10 @@ Ouvrir **2 terminaux** depuis la racine du projet et lancer les commandes **dans
 
 ### 1. Serveur RMI (terminal 1)
 
+Crée un fichier config.properties dans rmi/rmi-restaurant/ en se basant sur le .example :
+
+
+
 ```bash
 cd rmi/rmi-restaurant
 mvn clean install
