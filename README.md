@@ -15,6 +15,7 @@ Ouvrir **2 terminaux** depuis la racine du projet et lancer les commandes **dans
 ### 1. Serveur RMI (terminal 1)
 
 ```bash
+cd rmi/rmi-restaurant
 mvn clean install
 mvn exec:java
 ```
@@ -24,6 +25,7 @@ Le serveur affiche `Service Restaurant pret.` et reste actif. **Ne pas fermer ce
 ### 2. Proxy Java (terminal 2)
 
 ```bash
+cd proxy-java
 mvn clean compile 
 mvn exec:java
 ```
