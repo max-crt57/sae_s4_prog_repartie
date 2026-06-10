@@ -32,6 +32,52 @@
 
         <div id="map"></div>
     </section>
+
+    <section id="report-section" class="hidden">
+        <div class="report-container">
+            <h2>Compte Rendu du Projet - SAE Application Répartie</h2>
+
+            <div class="report-card">
+                <h3>Architecture de l'application</h3>
+                <p>L'application respecte une architecture répartie permettant de contourner les restrictions CORS des navigateurs :</p>
+                <ul>
+                    <li><strong>Front-end (Client) :</strong> Développé en HTML/CSS et TypeScript. Utilisation de Leaflet.js pour la cartographie. Transpilé avec esbuild.</li>
+                    <li><strong>Back-end (Proxy Java) :</strong> Un serveur HTTP personnalisé utilisant <code>com.sun.net.httpserver</code>. Il agit comme un pont pour interroger les données distantes.</li>
+                    <li><strong>APIs Distantes :</strong> JCDecaux (Norme GBFS pour les vélos) et API de la Métropole du Grand Nancy (Incidents).</li>
+                </ul>
+                <div class="schema-placeholder">
+                    <em>[Insérer le schéma de l'architecture ici]</em>
+                </div>
+            </div>
+
+            <div class="report-card">
+                <h3>Ce qui a été fait</h3>
+                <ul>
+                    <li>Mise en place de la carte interactive Leaflet centrée sur Nancy.</li>
+                    <li>Récupération et fusion des données GBFS (Informations et Statuts) pour les stations de vélos.</li>
+                    <li>Création d'un Proxy Java pour contourner le blocage CORS de l'API des incidents de voirie.</li>
+                    <li>Création d'icônes dynamiques (vert/rouge pour les vélos selon la disponibilité).</li>
+                    <li>Séparation du code TypeScript en modules (Data, Map, App).</li>
+                </ul>
+            </div>
+
+            <div class="report-card">
+                <h3>Manuel d'utilisation</h3>
+                <ol>
+                    <li>Lancer le serveur Proxy Java (<code>Main.java</code>) sur le port 8080.</li>
+                    <li>Ouvrir le projet Front-end avec un serveur local (ex: Live Server sur VS Code).</li>
+                    <li>Dans la barre d'outils de la carte, vérifier que l'URL du proxy pointe bien vers <code>http://localhost:8080</code>.</li>
+                    <li>Cliquer sur "Recharger" pour synchroniser les données en temps réel.</li>
+                </ol>
+            </div>
+
+            <div class="report-card">
+                <h3>Dépôt Git</h3>
+                <p>Retrouvez l'intégralité du code source (Java et Web) sur notre dépôt Git :</p>
+                <a href="https://github.com/max-crt57/sae_s4_prog_repartie.git" target="_blank" class="git-link">Accéder au dépôt GitHub / GitLab</a>
+            </div>
+        </div>
+    </section>
 </main>
 
 <script src="ts/app.js"></script>
