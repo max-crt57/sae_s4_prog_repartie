@@ -2,6 +2,7 @@ package iut.sae;
 
 import java.net.InetSocketAddress;
 import com.sun.net.httpserver.HttpServer;
+import rmi.RestaurantRMIHandler;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -24,21 +25,40 @@ public class Main {
 
                 exchange.getResponseHeaders().add("Content-Type", "application/json; charset=UTF-8");
                 exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-                
+
                 byte[] bytes = jsonResponse.getBytes("UTF-8");
                 exchange.sendResponseHeaders(200, bytes.length);
                 exchange.getResponseBody().write(bytes);
-                
+
             } catch (Exception e) {
                 e.printStackTrace();
                 String error = "{\"status\":\"error\", \"message\":\"" + e.getMessage() + "\"}";
                 try {
                     exchange.sendResponseHeaders(500, error.getBytes().length);
                     exchange.getResponseBody().write(error.getBytes());
-                } catch (Exception ex) {}
+                } catch (Exception ex) {
+                }
             } finally {
                 exchange.close();
             }
+        });
+
+        // Getrestaurants
+        server.createContext("/api/restaurants", exchange -> {
+
+            String response;
+            try {
+                response = RestaurantRMIHandler.fetchRestaurants();
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+
+                exchange.sendResponseHeaders(200, response.getBytes().length);
+                exchange.getResponseBody().write(response.getBytes());
+                exchange.close();
+            } catch (Exception e) { // TODO
+                e.printStackTrace();
+            }
+
         });
 
         server.start();

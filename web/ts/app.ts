@@ -1,6 +1,6 @@
 // On importe les outils depuis nos nouveaux modules
-import { StationVelo, Incident } from './types';
-import { map, layers, veloIcon, incidentIcon, escapeHtml, parsePolylinePoint } from './mapUtils';
+import { StationVelo, Incident, Restaurant } from './types';
+import { map, layers, veloIcon, incidentIcon, restaurantIcon, escapeHtml, parsePolylinePoint } from './mapUtils';
 
 // gestion du dom et du proxy
 const defaultApiBase: string = location.port === '8080' ? `${location.protocol}//${location.host}` : 'http://localhost:8080';
@@ -76,6 +76,29 @@ async function loadIncidents(): Promise<void> {
     }
 }
 
+async function loadRestaurants(): Promise<void> {
+    layers.restaurants.clearLayers();
+    const response = await fetch(`${apiBase()}/api/restaurants`);
+    if (!response.ok) throw new Error("Erreur API Restaurants");
+    
+    const data = await response.json();
+
+    if (Array.isArray(data)) {
+        import('leaflet').then(L => {
+            data.forEach((restau: Restaurant) => {
+                const ouverture = String(Math.floor(restau.ouvertureMin / 60)).padStart(2, '0') + "h" + String(restau.ouvertureMin % 60).padStart(2, '0');
+                const fermeture = String(Math.floor(restau.fermetureMin / 60)).padStart(2, '0') + "h" + String(restau.fermetureMin % 60).padStart(2, '0');
+                
+                L.marker([restau.latitude, restau.longitude], { icon: restaurantIcon() }).bindPopup(`
+                    <strong>Restaurant : ${escapeHtml(restau.nom)}</strong><br>
+                    <hr style="margin: 5px 0;">
+                    <span class="badge">Ouvert de ${ouverture} à ${fermeture}</span>
+                `).addTo(layers.restaurants);
+            });
+        });
+    }
+}
+
 // evenements
 document.getElementById('save-api')!.addEventListener('click', () => {
     localStorage.setItem('API_BASE', apiBase());
@@ -84,7 +107,7 @@ document.getElementById('save-api')!.addEventListener('click', () => {
 
 document.getElementById('reload')!.addEventListener('click', () => {
     setStatus("Chargement...");
-    Promise.all([loadBikes(), loadIncidents()])
+    Promise.all([loadBikes(), loadIncidents(), loadRestaurants()])
         .then(() => setStatus("Prêt."))
         .catch(err => setStatus("Erreur !"));
 });
@@ -103,4 +126,4 @@ document.getElementById('tab-report')!.addEventListener('click', () => switchTab
 window.addEventListener('load', () => setTimeout(() => map.invalidateSize(), 100));
 
 // initialisation
-Promise.all([loadBikes(), loadIncidents()]).catch(err => console.error(err));
+Promise.all([loadBikes(), loadIncidents(), loadRestaurants()]).catch(err => console.error(err));

@@ -19,3 +19,12 @@ export interface Incident {
         location_description: string;
     };
 }
+
+export interface Restaurant {
+    id: number;
+    nom: string;
+    latitude: number;
+    longitude: number;
+    ouvertureMin: number;
+    fermetureMin: number;
+}
