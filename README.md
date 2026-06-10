@@ -12,10 +12,13 @@
 
 Ouvrir **2 terminaux** depuis la racine du projet et lancer les commandes **dans cet ordre** :
 
-### 1. Serveur RMI (terminal 1)
+### 1. Importer la base de donnée dans SQLDelopper
+
+Importer le contenu de `sql/script.sql` dans SQLDelopper.
+
+### 2. Serveur RMI (terminal 1)
 
 Crée un fichier config.properties dans rmi/rmi-restaurant/ en se basant sur le .example :
-
 
 
 ```bash
@@ -26,7 +29,7 @@ mvn exec:java
 
 Le serveur affiche `Service Restaurant pret.` et reste actif. **Ne pas fermer ce terminal.**
 
-### 2. Proxy Java (terminal 2)
+### 3. Proxy Java (terminal 2)
 
 ```bash
 cd proxy-java
