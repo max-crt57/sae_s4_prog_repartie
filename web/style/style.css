@@ -61,3 +61,23 @@ html, body {
     color: white;
     font-weight: bold;
 }
+
+.restaurant-pin {
+    width: 30px;
+    height: 30px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    position: relative;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+    border: 2px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.restaurant-pin svg {
+    transform: rotate(45deg);
+    width: 18px;
+    height: 18px;
+    fill: white;
+}

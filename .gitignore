@@ -16,3 +16,4 @@ config.properties
 
 target/
 rmi/rmi-restaurant/target/
+web/ts/app.js
