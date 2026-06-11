@@ -28,3 +28,8 @@ export interface Restaurant {
     ouvertureMin: number;
     fermetureMin: number;
 }
+
+export interface TableResto {
+    numTable: number;
+    nbPlace: number;
+}

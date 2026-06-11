@@ -1,6 +1,6 @@
 import L from 'leaflet';
 
-// On exporte la carte et les calques pour que app.ts puisse s'en servir
+// on exporte la carte et les calques pour que app.ts puisse s'en servir
 export const map = L.map('map').setView([48.6921, 6.1844], 13);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

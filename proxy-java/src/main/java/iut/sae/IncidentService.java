@@ -9,9 +9,7 @@ public class IncidentService {
 
     private static final String API_URL = "https://carto.g-ny.eu/data/cifs/cifs_waze_v2.json";
 
-    /**
-     * Méthode statique pour récupérer les incidents depuis l'API de la Métropole
-     */
+    // recuperer les incidents depuis l'api de la metropole
     public static String fetchIncidents() throws Exception {
         HttpClient client = HttpClient.newHttpClient();
 

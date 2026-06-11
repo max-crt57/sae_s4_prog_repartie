@@ -18,7 +18,7 @@ public class LancerRestaurant {
         System.out.println("Service Restaurant pret.");
         System.out.println("Appuyez sur Ctrl+C pour arreter le serveur.");
 
-        // Bloquer le thread principal pour garder le serveur RMI en vie
+        // bloquer le thread principal pour garder le serveur rmi en vie
         Thread.currentThread().join();
     }
 }
