@@ -4878,8 +4878,8 @@
           }
         });
         var MarkerDrag = Handler.extend({
-          initialize: function(marker2) {
-            this._marker = marker2;
+          initialize: function(marker3) {
+            this._marker = marker3;
           },
           addHooks: function() {
             var icon2 = this._marker._icon;
@@ -4909,7 +4909,7 @@
             return this._draggable && this._draggable._moved;
           },
           _adjustPan: function(e) {
-            var marker2 = this._marker, map2 = marker2._map, speed = this._marker.options.autoPanSpeed, padding = this._marker.options.autoPanPadding, iconPos = getPosition(marker2._icon), bounds = map2.getPixelBounds(), origin = map2.getPixelOrigin();
+            var marker3 = this._marker, map2 = marker3._map, speed = this._marker.options.autoPanSpeed, padding = this._marker.options.autoPanPadding, iconPos = getPosition(marker3._icon), bounds = map2.getPixelBounds(), origin = map2.getPixelOrigin();
             var panBounds = toBounds(
               bounds.min._subtract(origin).add(padding),
               bounds.max._subtract(origin).subtract(padding)
@@ -4922,7 +4922,7 @@
               map2.panBy(movement, { animate: false });
               this._draggable._newPos._add(movement);
               this._draggable._startPos._add(movement);
-              setPosition(marker2._icon, this._draggable._newPos);
+              setPosition(marker3._icon, this._draggable._newPos);
               this._onDrag(e);
               this._panRequest = requestAnimFrame(this._adjustPan.bind(this, e));
             }
@@ -4939,14 +4939,14 @@
             }
           },
           _onDrag: function(e) {
-            var marker2 = this._marker, shadow = marker2._shadow, iconPos = getPosition(marker2._icon), latlng = marker2._map.layerPointToLatLng(iconPos);
+            var marker3 = this._marker, shadow = marker3._shadow, iconPos = getPosition(marker3._icon), latlng = marker3._map.layerPointToLatLng(iconPos);
             if (shadow) {
               setPosition(shadow, iconPos);
             }
-            marker2._latlng = latlng;
+            marker3._latlng = latlng;
             e.latlng = latlng;
             e.oldLatLng = this._oldLatLng;
-            marker2.fire("move", e).fire("drag", e);
+            marker3.fire("move", e).fire("drag", e);
           },
           _onDragEnd: function(e) {
             cancelAnimFrame(this._panRequest);
@@ -5251,7 +5251,7 @@
             return this.options.icon.options.tooltipAnchor;
           }
         });
-        function marker(latlng, options) {
+        function marker2(latlng, options) {
           return new Marker(latlng, options);
         }
         var Path = Layer.extend({
@@ -9550,7 +9550,7 @@
         exports2.latLngBounds = toLatLngBounds;
         exports2.layerGroup = layerGroup;
         exports2.map = createMap;
-        exports2.marker = marker;
+        exports2.marker = marker2;
         exports2.point = toPoint;
         exports2.polygon = polygon;
         exports2.polyline = polyline;
@@ -9584,7 +9584,8 @@
   }).addTo(map);
   var layers = {
     velos: import_leaflet.default.layerGroup().addTo(map),
-    incidents: import_leaflet.default.layerGroup().addTo(map)
+    incidents: import_leaflet.default.layerGroup().addTo(map),
+    restaurants: import_leaflet.default.layerGroup().addTo(map)
   };
   function veloIcon(bikesAvailable = 0) {
     const statusClass = bikesAvailable > 0 ? "dispo" : "vide";
@@ -9606,6 +9607,16 @@
       popupAnchor: [0, -30]
     });
   }
+  function restaurantIcon() {
+    const restaurantSvg = `<svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>`;
+    return import_leaflet.default.divIcon({
+      className: "custom-leaflet-icon",
+      html: `<div class="restaurant-pin" style="background-color: #3498db;">${restaurantSvg}</div>`,
+      iconSize: [30, 42],
+      iconAnchor: [15, 34],
+      popupAnchor: [0, -30]
+    });
+  }
   function escapeHtml(value) {
     return String(value ?? "").replace(/[&<>'"]/g, (c) => ({
       "&": "&amp;",
@@ -9622,16 +9633,111 @@
     return [parts[0], parts[1]];
   }
 
-  // ts/app.ts
-  var defaultApiBase = location.port === "8080" ? `${location.protocol}//${location.host}` : "http://localhost:8080";
-  var apiBaseInput = document.getElementById("api-base");
-  var statusEl = document.getElementById("status");
-  apiBaseInput.value = localStorage.getItem("API_BASE") || defaultApiBase;
-  function apiBase() {
-    return apiBaseInput.value.replace(/\/$/, "");
+  // ts/reservation.ts
+  var currentRestauId = null;
+  var currentDatetime = null;
+  var currentGuests = null;
+  async function checkTablesAndOpenModal(restau) {
+    const datetimeInput = document.querySelector(".leaflet-popup .popup-datetime");
+    const guestsInput = document.querySelector(".leaflet-popup .popup-guests");
+    const datetime = datetimeInput.value;
+    const guests = guestsInput.value;
+    if (!datetime || !guests) {
+      alert("Veuillez remplir la date, l'heure et le nombre de convives.");
+      return;
+    }
+    try {
+      const response = await fetch(`${getApiBase()}/api/tables?idRest=${restau.id}&datetime=${encodeURIComponent(datetime)}`);
+      if (!response.ok) throw new Error();
+      const tables = await response.json();
+      const validTables = tables.filter((t) => t.nbPlace >= parseInt(guests));
+      if (validTables.length === 0) {
+        alert("Aucune table assez grande n'est disponible \xE0 cette heure.");
+        return;
+      }
+      currentRestauId = restau.id;
+      currentDatetime = datetime;
+      currentGuests = parseInt(guests);
+      const modalTitle = document.getElementById("modal-rest-name");
+      const tableSelect = document.getElementById("table-select");
+      const resMessage = document.getElementById("res-message");
+      modalTitle.textContent = restau.nom;
+      document.getElementById("modal-date-display").textContent = new Date(datetime).toLocaleString("fr-FR");
+      document.getElementById("modal-guests-display").textContent = guests;
+      tableSelect.innerHTML = "";
+      validTables.forEach((t) => {
+        const opt = document.createElement("option");
+        opt.value = t.numTable.toString();
+        opt.textContent = `Table n\xB0${t.numTable} (${t.nbPlace} places)`;
+        tableSelect.appendChild(opt);
+      });
+      resMessage.textContent = "";
+      document.getElementById("res-nom").value = "";
+      document.getElementById("res-prenom").value = "";
+      document.getElementById("res-tel").value = "";
+      const modal = document.getElementById("reservation-modal");
+      modal.showModal();
+    } catch (err) {
+      alert("Erreur lors de la r\xE9cup\xE9ration des tables.");
+    }
   }
-  function setStatus(message) {
-    statusEl.textContent = message;
+  function setupReservationEvents() {
+    const modal = document.getElementById("reservation-modal");
+    const closeModal = document.getElementById("close-modal");
+    const btnConfirmRes = document.getElementById("btn-confirm-res");
+    const tableSelect = document.getElementById("table-select");
+    const resMessage = document.getElementById("res-message");
+    closeModal.addEventListener("click", () => modal.close());
+    btnConfirmRes.addEventListener("click", async () => {
+      const selectedTableVal = tableSelect.value;
+      if (!selectedTableVal) {
+        alert("Veuillez s\xE9lectionner une table.");
+        return;
+      }
+      const nom = document.getElementById("res-nom").value;
+      const prenom = document.getElementById("res-prenom").value;
+      const tel = document.getElementById("res-tel").value;
+      if (!nom || !prenom || !tel) {
+        alert("Veuillez remplir vos coordonn\xE9es.");
+        return;
+      }
+      const payload = {
+        idRestaurant: currentRestauId,
+        datetime: currentDatetime,
+        numTable: parseInt(selectedTableVal),
+        nbConvives: currentGuests,
+        nom,
+        prenom,
+        telephone: tel
+      };
+      try {
+        const response = await fetch(`${getApiBase()}/api/reservations`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (data.success) {
+          resMessage.style.color = "#27ae60";
+          resMessage.textContent = "R\xE9servation confirm\xE9e !";
+          setTimeout(() => modal.close(), 3e3);
+        } else {
+          resMessage.style.color = "red";
+          resMessage.textContent = data.message;
+        }
+      } catch (err) {
+        resMessage.style.color = "red";
+        resMessage.textContent = "Erreur de connexion.";
+      }
+    });
+  }
+
+  // ts/api.ts
+  var L3 = __toESM(require_leaflet_src());
+  var defaultApiBase = location.port === "8080" ? `${location.protocol}//${location.host}` : "http://localhost:8080";
+  function getApiBase() {
+    const apiBaseInput2 = document.getElementById("api-base");
+    return apiBaseInput2.value.replace(/\/$/, "");
   }
   async function loadBikes() {
     layers.velos.clearLayers();
@@ -9648,47 +9754,77 @@
       const status = statusMap.get(station.station_id);
       const bikes = status ? status.num_bikes_available : 0;
       const docks = status ? status.num_docks_available : 0;
-      Promise.resolve().then(() => __toESM(require_leaflet_src())).then((L3) => {
-        L3.marker([station.lat, station.lon], { icon: veloIcon(bikes) }).bindPopup(`
-                <strong>${escapeHtml(station.name)}</strong><br>
-                ${escapeHtml(station.address || "")}<br>
-                <span class="badge">V\xE9los : ${bikes}</span>
-                <span class="badge">Places : ${docks}</span>
-            `).addTo(layers.velos);
-      });
+      L3.marker([station.lat, station.lon], { icon: veloIcon(bikes) }).bindPopup(`
+            <strong>${escapeHtml(station.name)}</strong><br>
+            ${escapeHtml(station.address || "")}<br>
+            <span class="badge">V\xE9los : ${bikes}</span>
+            <span class="badge">Places : ${docks}</span>
+        `).addTo(layers.velos);
     });
   }
   async function loadIncidents() {
     layers.incidents.clearLayers();
-    const response = await fetch(`${apiBase()}/api/incidents`);
+    const response = await fetch(`${getApiBase()}/api/incidents`);
     if (!response.ok) throw new Error("Erreur API Incidents");
     const data = await response.json();
     if (data.incidents) {
-      Promise.resolve().then(() => __toESM(require_leaflet_src())).then((L3) => {
-        data.incidents.forEach((incident) => {
-          const coords = parsePolylinePoint(incident.location?.polyline);
-          if (coords) {
-            const dateDebut = new Date(incident.starttime).toLocaleDateString("fr-FR");
-            const dateFin = new Date(incident.endtime).toLocaleDateString("fr-FR");
-            L3.marker(coords, { icon: incidentIcon() }).bindPopup(`
-                        <strong>Incident : ${escapeHtml(incident.short_description)}</strong><br>
-                        <em>${escapeHtml(incident.location.location_description)}</em><br>
-                        <hr style="margin: 5px 0;">
-                        <span class="badge">Du ${dateDebut} au ${dateFin}</span>
-                    `).addTo(layers.incidents);
-          }
-        });
+      data.incidents.forEach((incident) => {
+        const coords = parsePolylinePoint(incident.location?.polyline);
+        if (coords) {
+          const dateDebut = new Date(incident.starttime).toLocaleDateString("fr-FR");
+          const dateFin = new Date(incident.endtime).toLocaleDateString("fr-FR");
+          L3.marker(coords, { icon: incidentIcon() }).bindPopup(`
+                    <strong>Incident : ${escapeHtml(incident.short_description)}</strong><br>
+                    <em>${escapeHtml(incident.location.location_description)}</em><br>
+                    <hr class="popup-hr">
+                    <span class="badge">Du ${dateDebut} au ${dateFin}</span>
+                `).addTo(layers.incidents);
+        }
       });
     }
   }
-  document.getElementById("save-api").addEventListener("click", () => {
-    localStorage.setItem("API_BASE", apiBase());
-    setStatus(`Proxy enregistr\xE9 : ${apiBase()}`);
-  });
-  document.getElementById("reload").addEventListener("click", () => {
-    setStatus("Chargement...");
-    Promise.all([loadBikes(), loadIncidents()]).then(() => setStatus("Pr\xEAt.")).catch((err) => setStatus("Erreur !"));
-  });
+  function getCurrentDateTimeLocal() {
+    const now = /* @__PURE__ */ new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    return now.toISOString().slice(0, 16);
+  }
+  async function loadRestaurants() {
+    layers.restaurants.clearLayers();
+    const response = await fetch(`${getApiBase()}/api/restaurants`);
+    if (!response.ok) throw new Error("Erreur API Restaurants");
+    const data = await response.json();
+    if (Array.isArray(data)) {
+      data.forEach((restau) => {
+        const ouverture = String(Math.floor(restau.ouvertureMin / 60)).padStart(2, "0") + "h" + String(restau.ouvertureMin % 60).padStart(2, "0");
+        const fermeture = String(Math.floor(restau.fermetureMin / 60)).padStart(2, "0") + "h" + String(restau.fermetureMin % 60).padStart(2, "0");
+        const marker2 = L3.marker([restau.latitude, restau.longitude], { icon: restaurantIcon() }).bindPopup(`
+                <strong>Restaurant : ${escapeHtml(restau.nom)}</strong>
+                <hr class="popup-hr">
+                <span class="badge">Ouvert de ${ouverture} \xE0 ${fermeture}</span>
+                <div class="popup-form">
+                    <label>Date & Heure :</label>
+                    <input type="datetime-local" class="popup-datetime" min="${getCurrentDateTimeLocal()}" required>
+                    <label>Convives :</label>
+                    <input type="number" class="popup-guests" min="1" value="2" required>
+                    <button class="btn-check-tables">Voir les tables disponibles</button>
+                </div>
+            `);
+        marker2.on("popupopen", () => {
+          const btn = document.querySelector(".leaflet-popup .btn-check-tables");
+          if (btn) {
+            btn.addEventListener("click", () => checkTablesAndOpenModal(restau));
+          }
+        });
+        marker2.addTo(layers.restaurants);
+      });
+    }
+  }
+
+  // ts/ui.ts
+  function setupTabs() {
+    document.getElementById("tab-map").addEventListener("click", () => switchTab("map"));
+    document.getElementById("tab-report").addEventListener("click", () => switchTab("report"));
+  }
   function switchTab(tab) {
     document.getElementById("map-section").classList.toggle("hidden", tab !== "map");
     document.getElementById("report-section").classList.toggle("hidden", tab !== "report");
@@ -9696,10 +9832,26 @@
     document.getElementById("tab-report").classList.toggle("active", tab === "report");
     if (tab === "map") setTimeout(() => map.invalidateSize(), 50);
   }
-  document.getElementById("tab-map").addEventListener("click", () => switchTab("map"));
-  document.getElementById("tab-report").addEventListener("click", () => switchTab("report"));
+
+  // ts/app.ts
+  var apiBaseInput = document.getElementById("api-base");
+  var statusEl = document.getElementById("status");
+  apiBaseInput.value = localStorage.getItem("API_BASE") || defaultApiBase;
+  function setStatus(message) {
+    statusEl.textContent = message;
+  }
+  document.getElementById("save-api").addEventListener("click", () => {
+    localStorage.setItem("API_BASE", getApiBase());
+    setStatus(`Proxy enregistr\xE9 : ${getApiBase()}`);
+  });
+  document.getElementById("reload").addEventListener("click", () => {
+    setStatus("Chargement...");
+    Promise.all([loadBikes(), loadIncidents(), loadRestaurants()]).then(() => setStatus("Pr\xEAt.")).catch((err) => setStatus("Erreur !"));
+  });
+  setupTabs();
+  setupReservationEvents();
   window.addEventListener("load", () => setTimeout(() => map.invalidateSize(), 100));
-  Promise.all([loadBikes(), loadIncidents()]).catch((err) => console.error(err));
+  Promise.all([loadBikes(), loadIncidents(), loadRestaurants()]).catch((err) => console.error(err));
 })();
 /*! Bundled license information:
 
