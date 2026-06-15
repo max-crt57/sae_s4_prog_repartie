@@ -97,26 +97,31 @@
 
                     <div class="manuel-section">
                         <h4>2. Serveur RMI (Terminal 1)</h4>
-                        <p>Créer un fichier <code>config.properties</code> dans <code>rmi/rmi-restaurant/</code> en se
-                            basant sur le fichier <code>.example</code>. Puis, lancer le serveur :</p>
+                        <p>Créer un fichier <code>.env</code> dans <code>rmi/rmi-restaurant/</code> en se
+                            basant sur le fichier <code>.env.example</code>. Compilez puis lancez le serveur via le JAR généré :</p>
                         <div class="code-block">
                             cd rmi/rmi-restaurant<br>
                             mvn clean install<br>
-                            mvn exec:java
+                            java -jar target/rmi-restaurant-1.0-SNAPSHOT-jar-with-dependencies.jar
                         </div>
-                        <p><em>Le serveur affiche <code>Service Restaurant pret.</code> et reste actif. Ne pas fermer ce
+                        <p><em>Le serveur affiche <code>Service Restaurant pret et enregistre sur le port 1099</code> et reste actif. Ne pas fermer ce
                                 terminal.</em></p>
                     </div>
 
                     <div class="manuel-section">
                         <h4>3. Proxy Java (Terminal 2)</h4>
-                        <p>Lancer le serveur HTTP intermédiaire :</p>
+                        <p>Créer un fichier <code>.env</code> dans <code>proxy-java/</code> en se
+                            basant sur le fichier <code>.env.example</code> (avec <code>RMI_REGISTRY_HOST=localhost</code> pour tester en local). Compilez puis lancez le proxy via le JAR généré :</p>
                         <div class="code-block">
                             cd proxy-java<br>
-                            mvn clean compile<br>
-                            mvn exec:java
+                            mvn clean install<br>
+                            java -jar target/serveur_java-1.0-jar-with-dependencies.jar
                         </div>
-                        <p><em>Le proxy se lance sur <code>http://localhost:8080</code>.</em></p>
+                        <p><strong>Important :</strong> Si vous lancez le proxy depuis le réseau de l'IUT, utilisez la commande suivante pour la connexion sortante :</p>
+                        <div class="code-block">
+                            java -Dhttp.proxyHost=www-cache -Dhttp.proxyPort=3128 -Dhttps.proxyHost=www-cache -Dhttps.proxyPort=3128 -jar target/serveur_java-1.0-jar-with-dependencies.jar
+                        </div>
+                        <p><em>Le proxy se lance sur <code>http://localhost:8080</code> (ou le port défini dans votre <code>.env</code>).</em></p>
                     </div>
 
                     <div class="manuel-section">
