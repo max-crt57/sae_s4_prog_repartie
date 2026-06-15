@@ -4,9 +4,13 @@ import java.net.InetSocketAddress;
 import com.sun.net.httpserver.HttpServer;
 import rmi.RestaurantRMIHandler;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 public class Main {
     public static void main(String[] args) throws Exception {
-        HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
+        Dotenv dotenv = Dotenv.load();
+        int proxyPort = Integer.parseInt(dotenv.get("PROXY_PORT", "8080"));
+        HttpServer server = HttpServer.create(new InetSocketAddress(proxyPort), 0);
 
         server.createContext("/api/health", exchange -> {
             String response = "{\"status\":\"ok\"}";
@@ -48,7 +52,7 @@ public class Main {
 
             String response;
             try {
-                response = RestaurantRMIHandler.fetchRestaurants();
+                response = RestaurantRMIHandler.getInstance().fetchRestaurants();
                 exchange.getResponseHeaders().add("Content-Type", "application/json");
                 exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
 
@@ -88,7 +92,7 @@ public class Main {
                     }
                 }
 
-                String response = RestaurantRMIHandler.fetchTablesDisponibles(idRest, datetime);
+                String response = RestaurantRMIHandler.getInstance().fetchTablesDisponibles(idRest, datetime);
 
                 exchange.getResponseHeaders().add("Content-Type", "application/json");
                 exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
@@ -126,7 +130,7 @@ public class Main {
                 String datetime = extractJsonField(body, "datetime");
                 int numTable = Integer.parseInt(extractJsonField(body, "numTable"));
 
-                String response = RestaurantRMIHandler.reserverTable(nom, prenom, tel, nbC, idRest, datetime, numTable);
+                String response = RestaurantRMIHandler.getInstance().reserverTable(nom, prenom, tel, nbC, idRest, datetime, numTable);
 
                 exchange.getResponseHeaders().add("Content-Type", "application/json");
                 exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
@@ -148,7 +152,7 @@ public class Main {
 
         server.start();
 
-        System.out.println("Proxy lancé sur http://localhost:8080");
+        System.out.println("Proxy lancé sur http://localhost:" + proxyPort);
     }
 
     private static String extractJsonField(String json, String field) {

@@ -1,5 +1,6 @@
 package rmi.sae;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
@@ -7,7 +8,11 @@ public class ClientTestRestaurant {
 
     public static void main(String[] args) throws Exception {
 
-        Registry reg = LocateRegistry.getRegistry("localhost", 1099);
+        Dotenv dotenv = Dotenv.load();
+        String host = dotenv.get("RMI_REGISTRY_HOST", "charlemagne.iutnc.univ-lorraine.fr");
+        int port = Integer.parseInt(dotenv.get("RMI_REGISTRY_PORT", "1099"));
+
+        Registry reg = LocateRegistry.getRegistry(host, port);
 
         RestaurantService service = (RestaurantService) reg.lookup("RestaurantService");
 
