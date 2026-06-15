@@ -1,7 +1,7 @@
 package rmi;
 
 import io.github.cdimascio.dotenv.Dotenv;
-import rmi.sae.RestaurantService;
+import rmi.sae.RestaurantService; // dependance au projet rmi
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -11,7 +11,7 @@ import java.rmi.registry.Registry;
 public class RestaurantRMIHandler {
 
     private static RestaurantRMIHandler instance;
-    
+
     private RestaurantService service;
     private final String host;
     private final int port;
